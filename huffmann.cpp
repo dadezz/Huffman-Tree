@@ -33,7 +33,7 @@ class HuffmanTree{
             dizionario() : info('\0', 0), next(nullptr), prev(nullptr) {};
         };
 
-        // Helper function to recursively delete the tree
+        // Deallocazione ricorsiva memoria albero binario
         void destroyTree(nodo* node) {
             if (node == nullptr) {
                 return;
