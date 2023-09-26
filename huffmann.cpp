@@ -1,79 +1,6 @@
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <string>
-#include <array>
+#include "Huffman.hpp"
 
-using std::string;
-using std::pair;
-
-class HuffmanTree{
-    private:
-    
-        struct nodo { 
-            string codifica;
-            nodo* padre;
-            nodo* destra;
-            nodo* sinistra;
-
-            nodo(){
-                codifica = string{};
-                padre = destra = sinistra = nullptr;
-            }
-        }; 
-
-        typedef nodo* albero;
-        albero head;
-
-        struct dizionario { 
-            pair<char, int> info;
-            dizionario* next;
-            dizionario* prev;
-
-            dizionario() : info('\0', 0), next(nullptr), prev(nullptr) {};
-        };
-
-        // Deallocazione ricorsiva memoria albero binario
-        void destroyTree(nodo* node) {
-            if (node == nullptr) {
-                return;
-            }
-            destroyTree(node->sinistra);
-            destroyTree(node->destra);
-            delete node;
-        }
-
-
-        dizionario* dict_head;
-        dizionario* dict_tail;
-
-        void insert(char);
-        void bubble_sort();
-
-    public:
-
-        HuffmanTree() : head(nullptr), dict_head(nullptr), dict_tail(nullptr) {};
-        ~HuffmanTree(){
-            while(dict_head) {
-                dizionario* aux = dict_head;
-                dict_head = dict_head->next;
-                delete aux;
-            }
-            destroyTree(head);
-        };
-        friend std::istream& operator>>(std::istream& lhs, HuffmanTree& rhs);
-
-        albero get_tree_head();
-        void swap (dizionario* &, dizionario* &);
-        void stampa_dizionario();
-
-};
-
-HuffmanTree::albero HuffmanTree::get_tree_head(){
-    return head;
-}
-
-void HuffmanTree::insert(char x){
+void HuffmanTree::insert(string x){
     /**
      * if a char has yet been met, it just increases the counter of the relative cell;
      * else a new cell is created and set as the tail of the dictionary
@@ -105,7 +32,7 @@ void HuffmanTree::insert(char x){
 }
 
 void HuffmanTree::swap(dizionario* & a, dizionario* & b){
-    pair<char, int> aux = a->info;
+    pair<string, int> aux = a->info;
     a->info = b->info;
     b->info = aux;
 }
@@ -122,14 +49,12 @@ void HuffmanTree::bubble_sort() {
     }
 }
 
-
 std::istream& operator>>(std::istream& lhs, HuffmanTree& rhs){
     char c;
     do {
         c = lhs.get();
-        if (c != -1) rhs.insert(c);
+        if (c != -1) rhs.insert(string{c});
     } while (c != -1);
-    //rhs.stampa_dizionario();
     rhs.bubble_sort();
     return lhs;
 }
@@ -142,16 +67,78 @@ void HuffmanTree::stampa_dizionario(){
     }
 }
 
-int main(){
-    HuffmanTree prova;
-    HuffmanTree prova2;
-    string s = "qww wee";
-    std::istringstream st(s);
-    std::ifstream file("prova.txt");
-    st>>prova;
-    file>>prova2;
-    prova.stampa_dizionario();
-    std::cout<<" - - - - - - - - - - - "<<std::endl;
-    prova2.stampa_dizionario();
+void HuffmanTree::create_binary_node(dizionario* & maggiore, dizionario* & minore){
+    /**
+     * this function creates a binary tree with one root and two leaf nodes 
+     * (well, they can be trees, too).
+     * For Example, 
+     * 
+     * let our dictionary contain tree elements: 
+     * a : 2
+     * b : 1
+     * c : 4
+     * 
+     * the function takes the elements "a" and "b", creates a tree
+     * with the node "ab" as root and replace "a" and "b" with the element
+     * "ab : 3" in the dictionary
+     * 
+     * So, now we'll have this combination in the class:
+     * 
+     * The dictionary will be: [ (c:4)*, (ab:3) ], where the * is the head
+     * 
+     * The tree will be (ab:3) -> (a:2)
+     *                        \-> (b:1)
+     * 
+     * minchia in effetti mi serve modificare il dizionario per far si che stori anche l'indirizzo del nodo
+    */  
+    
+    this->bubble_sort();
 }
 
+HuffmanTree::albero HuffmanTree::create_tree(){
+    if (dict_head == nullptr) return nullptr;
+    while (dict_head->next != nullptr){
+        create_binary_node(dict_tail->prev, dict_tail);
+    }
+    head = dict_head->nodo_corrispondente;
+    return head;
+}
+
+void HuffmanTree::stampa_albero_rec(albero radice, int space){
+    if (radice == nullptr) return;
+
+    //prima faccio il ramo destro
+    stampa_albero_rec(radice->destra, space+25);
+
+    //faccio la stampa effettiva
+    std::cout<<std::endl;
+    for (int i=0; i<space; i++) std::cout<<" ";
+    std::cout<<radice->codifica<<std::endl;
+
+    //prosegup col sinistro
+    stampa_albero_rec(radice->sinistra, space+25);
+
+}
+
+int main(){
+    HuffmanTree prova;
+    //HuffmanTree prova2;
+    string s = "qwwweegggggggggteeppsssssssssssssssssssssssssssss";
+    std::istringstream st(s);
+    ///std::ifstream file("prova.txt");
+    st>>prova;
+    //file>>prova2;
+    prova.stampa_dizionario();
+    //std::cout<<" - - - - - - - - - - - "<<std::endl;
+   // prova2.stampa_dizionario();
+    std::cout<<" - - - - - - - - - - - "<<std::endl;
+    std::cout<<" - - - - - - - - - - - "<<std::endl;
+    std::cout<<" - - - - - - - - - - - "<<std::endl;
+    std::cout<<" PROVA ALBERO "<<std::endl;
+    prova.create_tree();
+    prova.stampa_albero();
+  
+
+    
+
+}
