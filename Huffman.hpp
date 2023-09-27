@@ -44,7 +44,7 @@ class HuffmanTree{
 
         void insert(string);
         void bubble_sort();
-        void create_binary_node(dizionario* & maggiore, dizionario* & minore);
+        void create_binary_node(dizionario* maggiore, dizionario* minore);
         void stampa_albero_rec(albero, int);
 
     public:
