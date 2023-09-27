@@ -35,6 +35,10 @@ void HuffmanTree::swap(dizionario* & a, dizionario* & b){
     pair<string, int> aux = a->info;
     a->info = b->info;
     b->info = aux;
+
+    albero aux2 = a->nodo_corrispondente;
+    a->nodo_corrispondente = b->nodo_corrispondente;
+    b->nodo_corrispondente = aux2;
 }
 
 void HuffmanTree::bubble_sort() {
@@ -42,11 +46,16 @@ void HuffmanTree::bubble_sort() {
     dizionario *aux1, *aux2;
     for (aux1 = dict_head; aux1 != nullptr; aux1 = aux1->next) {
         for (aux2 = dict_head; aux2 != nullptr; aux2 = aux2->next) {
-            if (aux2->next != nullptr && aux2->info.second < aux2->next->info.second) {
+            if (aux2->next != nullptr && aux2->info.second <= aux2->next->info.second) {
                 swap(aux2, aux2->next);
             }
         }
     }
+
+    aux1 = dict_head;
+    while(aux1->next) 
+        aux1 = aux1->next;
+    dict_tail = aux1;
 }
 
 std::istream& operator>>(std::istream& lhs, HuffmanTree& rhs){
@@ -67,7 +76,7 @@ void HuffmanTree::stampa_dizionario(){
     }
 }
 
-void HuffmanTree::create_binary_node(dizionario* & maggiore, dizionario* & minore){
+void HuffmanTree::create_binary_node(dizionario* maggiore, dizionario* minore){
     /**
      * this function creates a binary tree with one root and two leaf nodes 
      * (well, they can be trees, too).
@@ -92,6 +101,45 @@ void HuffmanTree::create_binary_node(dizionario* & maggiore, dizionario* & minor
      * minchia in effetti mi serve modificare il dizionario per far si che stori anche l'indirizzo del nodo
     */  
     
+    albero radice = new nodo;
+    radice->codifica = maggiore->info.first + minore->info.first;
+    albero mag /*sinistra*/, min /*destra*/;
+
+    /**
+     * creo l'albero bottom-up
+    */
+
+    if (maggiore->nodo_corrispondente == nullptr) {
+        mag = new nodo;
+        mag->destra = mag->sinistra = nullptr;
+        mag->codifica = maggiore->info.first;
+    }
+    else mag = maggiore->nodo_corrispondente;
+    if (minore->nodo_corrispondente == nullptr) {
+        min = new nodo;
+        min->destra = min->sinistra = nullptr;
+        min->codifica = minore->info.first;
+    }
+    else min = minore->nodo_corrispondente;
+    mag->padre = radice;
+    min->padre = radice;
+    radice->destra = min;
+    radice->sinistra = mag;
+
+    /**
+     * risistemo il dizionario
+    */
+
+    maggiore->info.first = radice->codifica;
+    maggiore->info.second = maggiore->info.second + minore->info.second;
+    maggiore->nodo_corrispondente = radice;
+
+    delete minore;
+    
+    maggiore->next = nullptr;
+    dict_tail = maggiore;
+
+
     this->bubble_sort();
 }
 
@@ -108,7 +156,7 @@ void HuffmanTree::stampa_albero_rec(albero radice, int space){
     if (radice == nullptr) return;
 
     //prima faccio il ramo destro
-    stampa_albero_rec(radice->destra, space+25);
+    stampa_albero_rec(radice->sinistra, space+10);
 
     //faccio la stampa effettiva
     std::cout<<std::endl;
@@ -116,14 +164,14 @@ void HuffmanTree::stampa_albero_rec(albero radice, int space){
     std::cout<<radice->codifica<<std::endl;
 
     //prosegup col sinistro
-    stampa_albero_rec(radice->sinistra, space+25);
+    stampa_albero_rec(radice->destra, space+10);
 
 }
 
 int main(){
     HuffmanTree prova;
     //HuffmanTree prova2;
-    string s = "qwwweegggggggggteeppsssssssssssssssssssssssssssss";
+    string s = "qwwwwwtttsssssss";
     std::istringstream st(s);
     ///std::ifstream file("prova.txt");
     st>>prova;
