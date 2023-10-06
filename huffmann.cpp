@@ -1,5 +1,7 @@
 #include "Huffman.hpp"
 
+#define PROVE 1
+
 void HuffmanTree::insert(string x){
     /**
      * if a char has yet been met, it just increases the counter of the relative cell;
@@ -149,6 +151,15 @@ HuffmanTree::albero HuffmanTree::create_tree(){
         create_binary_node(dict_tail->prev, dict_tail);
     }
     head = dict_head->nodo_corrispondente;
+
+    /**
+     * At this point, head of the tree is set, 
+     * i can delete the last node of the dictionary and set the pointers to nullptr
+    */
+
+    delete dict_head;
+    dict_head = dict_tail = nullptr;
+    
     return head;
 }
 
@@ -168,7 +179,9 @@ void HuffmanTree::stampa_albero_rec(albero radice, int space){
 
 }
 
+
 int main(){
+    #if PROVE
     HuffmanTree prova;
     //HuffmanTree prova2;
     string s = "qwwwwwtttsssssss";
@@ -185,7 +198,8 @@ int main(){
     std::cout<<" PROVA ALBERO "<<std::endl;
     prova.create_tree();
     prova.stampa_albero();
-  
+
+    #endif
 
     
 
