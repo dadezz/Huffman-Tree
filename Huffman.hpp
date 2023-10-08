@@ -4,6 +4,8 @@
 #include <string>
 #include <array>
 
+#define PROVE 1
+
 using std::string;
 using std::pair;
 
@@ -48,6 +50,7 @@ class HuffmanTree{
         void stampa_albero_rec(albero, int);
 
     public:
+        std::string create_string_tree(albero);
 
         HuffmanTree() : head(nullptr), dict_head(nullptr), dict_tail(nullptr) {};
         ~HuffmanTree(){
@@ -69,4 +72,6 @@ class HuffmanTree{
         void stampa_albero(){
             stampa_albero_rec(head, 0);
         };
+
+        string codifica (std::istream);
 };

@@ -1,6 +1,5 @@
 #include "Huffman.hpp"
 
-#define PROVE 1
 
 void HuffmanTree::insert(string x){
     /**

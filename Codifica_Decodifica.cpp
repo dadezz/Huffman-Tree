@@ -1,6 +1,5 @@
 #include "Huffman.hpp"
 
-#define PROVE 1
 
 /**
  * BRIEF:
@@ -47,3 +46,13 @@
  * 
  * 
 */
+std::string HuffmanTree::create_string_tree(HuffmanTree::albero nodo){
+    //punto 0 della codifica
+    if (nodo->destra == nullptr && nodo->sinistra == nullptr) return nodo->codifica;
+    if (nodo->destra == nullptr && nodo->sinistra != nullptr) return create_string_tree(nodo->sinistra) + "," +nodo->codifica;
+    if (nodo->sinistra == nullptr && nodo->destra != nullptr) return nodo->codifica + "," + create_string_tree(nodo->destra);
+    else return "(" + create_string_tree(nodo->sinistra) + "," + create_string_tree(nodo->destra) + ")";
+}
+string HuffmanTree::codifica (std::istream input){
+    string output = create_string_tree(head);
+}
