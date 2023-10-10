@@ -118,6 +118,84 @@ std::string HuffmanTree::create_string_tree(HuffmanTree::albero nodo){
  * a = a | mask;
 */
 
+void HuffmanTree::set_bit_zero(char& byte, u_short position){
+    char mask = 1;
+    for (short i=0; i<(8-position); i++){
+        mask = mask<<1;
+    }
+    mask = (~mask);
+    byte = byte & mask;
+}
+
+void HuffmanTree::set_bit_one(char& byte, u_short position){
+    char mask = 1;
+    for (short i=0; i<(8-position); i++){
+        mask = mask<<1;
+    }
+    byte = byte | mask;
+}
+
+void HuffmanTree::set_bits(char& byte, u_short bit, u_short position) {
+    /**
+     * La posizione viene considerata da sinistra, da 0 a 7:
+     * nel byte 01000000, l'1 è in posizione 1
+     * nel byte 00000010, l'1 è in posizione 6
+    */
+    if (bit == 0) 
+        set_bit_zero(byte, position);
+    else if (bit == 1)
+        set_bit_one(byte, position);
+    else ;
+        // throw exc
+}
+
+int HuffmanTree::max_tree_height(HuffmanTree::albero root) {
+    if (root == nullptr) {
+        return 0; // L'altezza di un albero vuoto è 0.
+    } else {
+        int altezzaSinistra = max_tree_height(root->sinistra);
+        int altezzaDestra = max_tree_height(root->destra);
+        return 1 + std::max(altezzaSinistra, altezzaDestra);
+    }
+}
+
 string HuffmanTree::codifica (std::istream input){
     string output = create_string_tree(head);
+    int tree_height = max_tree_height(head);
+    while (input.peek() != -1) {
+        char next_char = input.get();
+        /**
+         * ho una stringa che sarà il testo finale.
+         * devo aggiungere un byte SOLO quando è completo 
+         * con tutti i bit settati.
+         * Potrei procedere così:
+         *  - tengo conto della posizione [0-7] a cui sto scrivendo.
+         *  - mi porto dietro by reference sia la stringa di partenza che
+         *    il byte su cui sto scrivendo
+         *  - finché cerco il carattere nell'albero binario, ogni passo setto il bit
+         *  - se ne ho già settati 8, appendo il byte creato, resetto il char 
+         *    (posso tranquillamente stare nello heap e riutilizzare il char, perché non
+         *    vado ad appenderlo alla stringa per indirizzo, ma per copia)
+         *    e ricomincio a settare il tutto
+         *  - A naso, il tutto risulta più facile usando la ricerca binaria iterativa
+        */
+    }
+
 }
+
+
+/**
+ * per quanto riguarda la codifica, 
+ * ho due possibilità:
+ *  - scannerizzare on-the-fly l'albero per trovare la codifica
+ *  - scrivermi la codifica su un unordered map
+ * 
+ * in effetti però la codifica sarebbe qualcosa del tipo
+ * 'a' = "01101"
+ * 
+ * per scrivere i bit serve scorrere la stringa di 5 caratteri
+ * nella ricerca on-the-fly, ci sono 5 scelte di ramo da fare
+ * 
+ * i passaggi son quindi sempre 5, ma la ricerca on the fly non richiede spazio 
+ * aggiuntivo, userò quella.
+*/

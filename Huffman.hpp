@@ -1,8 +1,11 @@
+#pragma once
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <string>
 #include <array>
+#include <algorithm>
 
 #define PROVE 1
 
@@ -48,6 +51,10 @@ class HuffmanTree{
         void bubble_sort();
         void create_binary_node(dizionario* maggiore, dizionario* minore);
         void stampa_albero_rec(albero, int);
+        void set_bits(char&, u_short, u_short);
+        void set_bit_one(char& byte, u_short position);
+        void set_bit_zero(char& byte, u_short position);
+        int max_tree_height(albero);
 
     public:
         std::string create_string_tree(albero);
