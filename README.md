@@ -3,7 +3,7 @@ Semplice implementazione di un algoritmo di compressione testi basato sull'alber
 
 Diviso in 3 parti
  - [x] creazione dell'albero (vedasi sezione "huffman-Tree")
- - [ ] Compressione (in fase di implementazione - per dettagli su come ho pensato di procedere, guardare i commenti nel codice)
+ - [x] Compressione (vedasi i commenti nel codice)
  - [ ] Decompressione
 
 ***

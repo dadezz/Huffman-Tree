@@ -104,7 +104,7 @@ void HuffmanTree::create_binary_node(dizionario* maggiore, dizionario* minore){
     
     albero radice = new nodo;
     radice->codifica = maggiore->info.first + minore->info.first;
-    albero mag /*sinistra*/, min /*destra*/;
+    albero mag /*sinistra (bit 0) */, min /*destra (bit 1)*/;
 
     /**
      * creo l'albero bottom-up

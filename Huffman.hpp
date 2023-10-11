@@ -5,7 +5,6 @@
 #include <fstream>
 #include <string>
 #include <array>
-#include <algorithm>
 
 #define PROVE 1
 
@@ -51,10 +50,9 @@ class HuffmanTree{
         void bubble_sort();
         void create_binary_node(dizionario* maggiore, dizionario* minore);
         void stampa_albero_rec(albero, int);
-        void set_bits(char&, u_short, u_short);
-        void set_bit_one(char& byte, u_short position);
-        void set_bit_zero(char& byte, u_short position);
-        int max_tree_height(albero);
+        inline void set_bit_one(char& byte, u_short position);
+        inline void set_bit_zero(char& byte, u_short position);
+        inline void navigate_tree(char next_char, char& byte, u_short position, string& output);
 
     public:
         std::string create_string_tree(albero);
@@ -80,5 +78,5 @@ class HuffmanTree{
             stampa_albero_rec(head, 0);
         };
 
-        string codifica (std::istream);
+        string encode (std::istream);
 };

@@ -118,7 +118,8 @@ std::string HuffmanTree::create_string_tree(HuffmanTree::albero nodo){
  * a = a | mask;
 */
 
-void HuffmanTree::set_bit_zero(char& byte, u_short position){
+inline void HuffmanTree::set_bit_zero(char& byte, u_short position){
+    // sinistra
     char mask = 1;
     for (short i=0; i<(8-position); i++){
         mask = mask<<1;
@@ -127,62 +128,14 @@ void HuffmanTree::set_bit_zero(char& byte, u_short position){
     byte = byte & mask;
 }
 
-void HuffmanTree::set_bit_one(char& byte, u_short position){
+inline void HuffmanTree::set_bit_one(char& byte, u_short position){
+    // destra
     char mask = 1;
     for (short i=0; i<(8-position); i++){
         mask = mask<<1;
     }
     byte = byte | mask;
 }
-
-void HuffmanTree::set_bits(char& byte, u_short bit, u_short position) {
-    /**
-     * La posizione viene considerata da sinistra, da 0 a 7:
-     * nel byte 01000000, l'1 è in posizione 1
-     * nel byte 00000010, l'1 è in posizione 6
-    */
-    if (bit == 0) 
-        set_bit_zero(byte, position);
-    else if (bit == 1)
-        set_bit_one(byte, position);
-    else ;
-        // throw exc
-}
-
-int HuffmanTree::max_tree_height(HuffmanTree::albero root) {
-    if (root == nullptr) {
-        return 0; // L'altezza di un albero vuoto è 0.
-    } else {
-        int altezzaSinistra = max_tree_height(root->sinistra);
-        int altezzaDestra = max_tree_height(root->destra);
-        return 1 + std::max(altezzaSinistra, altezzaDestra);
-    }
-}
-
-string HuffmanTree::codifica (std::istream input){
-    string output = create_string_tree(head);
-    int tree_height = max_tree_height(head);
-    while (input.peek() != -1) {
-        char next_char = input.get();
-        /**
-         * ho una stringa che sarà il testo finale.
-         * devo aggiungere un byte SOLO quando è completo 
-         * con tutti i bit settati.
-         * Potrei procedere così:
-         *  - tengo conto della posizione [0-7] a cui sto scrivendo.
-         *  - mi porto dietro by reference sia la stringa di partenza che
-         *    il byte su cui sto scrivendo
-         *  - finché cerco il carattere nell'albero binario, ogni passo setto il bit
-         *  - se ne ho già settati 8, appendo il byte creato, resetto il char 
-         *    (posso tranquillamente stare nello heap e riutilizzare il char, perché non
-         *    vado ad appenderlo alla stringa per indirizzo, ma per copia)
-         *    e ricomincio a settare il tutto
-         *  - A naso, il tutto risulta più facile usando la ricerca binaria iterativa
-        */
-    }
-
-}
-
 
 /**
  * per quanto riguarda la codifica, 
@@ -199,3 +152,80 @@ string HuffmanTree::codifica (std::istream input){
  * i passaggi son quindi sempre 5, ma la ricerca on the fly non richiede spazio 
  * aggiuntivo, userò quella.
 */
+
+int check_encoding_char(char c, string s){
+    if (s.length() == 1) 
+        return s[0] == c ? 1 : 0;
+    bool found = 0;
+    int i = 0;
+    while (i<s.length() && !found){
+        if (s[i] == c) 
+            found = true;
+        i++;
+    }
+    return found ? 2 : 0;
+}
+
+inline void HuffmanTree::navigate_tree(char next_char, char& byte, u_short position, string& output){
+    albero aux = head;
+    bool found = false;
+    while (!found) {
+
+        // binary search
+        bool here = check_encoding_char(next_char, aux->sinistra->codifica);
+        if (here == 1 || here == 2) {
+            position = (position+1) % 8;
+            set_bit_zero(byte, position);
+            aux = aux->sinistra;
+            if (here == 1) found = true;            
+        }
+        else {
+            // i know for sure that the char is on this branch
+            position = (position+1) % 8;
+            set_bit_one(byte, position);
+            here = check_encoding_char(next_char, aux->destra->codifica);
+            aux = aux->destra;
+            if (here == 1) found = true;
+        }
+
+        // if i completed a byte, i have to append it to the output string and reset 
+        // the bits that have to be written
+        if (position == 0) {
+            output += byte;
+            byte = 0;
+        }
+    }
+
+}
+
+string HuffmanTree::encode (std::istream input){
+    string output = create_string_tree(head);
+        /**
+         * ho una stringa che sarà il testo finale.
+         * devo aggiungere un byte SOLO quando è completo 
+         * con tutti i bit settati.
+         * Potrei procedere così:
+         *  - tengo conto della posizione [0-7] a cui sto scrivendo.
+         *  - mi porto dietro by reference sia la stringa di partenza che
+         *    il byte su cui sto scrivendo
+         *  - finché cerco il carattere nell'albero binario, ogni passo setto il bit
+         *  - se ne ho già settati 8, appendo il byte creato, resetto il char 
+         *    (posso tranquillamente stare nello heap e riutilizzare il char, perché non
+         *    vado ad appenderlo alla stringa per indirizzo, ma per copia)
+         *    e ricomincio a settare il tutto
+         *  - A naso, il tutto risulta più facile usando la ricerca binaria iterativa
+        */
+
+    u_short position = 0;
+    char byte;
+
+    while (input.peek() != -1) {
+        char next_char = input.get();
+        navigate_tree(next_char, byte, position, output);
+    }
+
+    if (position > 0) output += byte;
+
+    return output;
+}
+
