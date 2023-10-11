@@ -48,9 +48,16 @@
 */
 std::string HuffmanTree::create_string_tree(HuffmanTree::albero nodo){
     //punto 0 della codifica
-    if (nodo->destra == nullptr && nodo->sinistra == nullptr) return nodo->codifica;
-    if (nodo->destra == nullptr && nodo->sinistra != nullptr) return create_string_tree(nodo->sinistra) + "," +nodo->codifica;
-    if (nodo->sinistra == nullptr && nodo->destra != nullptr) return nodo->codifica + "," + create_string_tree(nodo->destra);
+
+    /**
+     * gli apici ho scelto di metterli in un secondo momento, quando ho
+     * fatto il parsing durante la decodifica:
+     * Se un testo da comprimere contenesse delle parentesi, il successivo albero 
+     * risulterebbe avere parentesi non bilanciate (impossibile distinguere i rami dalle foglie)
+    */
+    if (nodo->destra == nullptr && nodo->sinistra == nullptr) return "'" + nodo->codifica + "'" ;
+    if (nodo->destra == nullptr && nodo->sinistra != nullptr) return create_string_tree(nodo->sinistra) + "," + "'" + nodo->codifica + "'";
+    if (nodo->sinistra == nullptr && nodo->destra != nullptr) return "'" + nodo->codifica + "'" + "," + create_string_tree(nodo->destra);
     else return "(" + create_string_tree(nodo->sinistra) + "," + create_string_tree(nodo->destra) + ")";
 }
 
@@ -198,7 +205,7 @@ inline void HuffmanTree::navigate_tree(char next_char, char& byte, u_short posit
 
 }
 
-string HuffmanTree::encode (std::istream input){
+string HuffmanTree::encode (std::istream& input){
     string output = create_string_tree(head);
         /**
          * ho una stringa che sarà il testo finale.
@@ -229,3 +236,78 @@ string HuffmanTree::encode (std::istream input){
     return output;
 }
 
+/**
+ * DECODIFICA
+ * inizio col parsing dell'albero
+*/
+
+HuffmanTree::albero HuffmanTree::parse_node (std::istream& input){
+    
+    char c;
+    
+    albero this_node = new nodo;
+    this_node->sinistra = get_tree_from_encoded_stream(input);
+    this_node->codifica += this_node->sinistra->codifica;
+    this_node->sinistra->padre = this_node;
+
+    c = input.get(); // consumes ','
+    if (c != ',') std::cout<<"(virgola) ah rega sto parsing che pigna in culo"<<std::endl;
+
+
+    this_node->destra = get_tree_from_encoded_stream(input);
+    this_node->codifica += this_node->destra->codifica;
+    this_node->destra->padre = this_node;
+
+    if (input.peek() != ')') std::cout<<"(parentesi chiusura) ah rega sto parsing che pigna in culo"<<std::endl;
+    
+    return this_node;
+}
+
+inline HuffmanTree::albero HuffmanTree::parse_leaf (std::istream& input){
+    char c;
+    c = input.get();
+    albero this_node = new nodo;
+    this_node->sinistra = this_node->destra = nullptr;
+    this_node->codifica = c;
+
+    if (input.peek() != '\'') std::cout<<"(apice chiusura) ah rega sto parsing che pigna in culo"<<std::endl;
+
+    return this_node;
+}
+
+HuffmanTree::albero HuffmanTree::get_tree_from_encoded_stream(std::istream& input){
+    
+    char c;
+    albero this_node;
+    
+    if (input.eof()) {
+        std::cout<<"wtf eof"<<std::endl;
+        return nullptr;
+    }
+
+    c = input.get();
+    
+    if (c == '(')         
+        this_node = parse_node(input); // consumes something like ( ... , ... )
+    else if (c == '\'')
+        this_node = parse_leaf(input); // consumes something like 'c'
+    else std::cout<<"(parentesi o apice iniziali) ah rega sto parsing che pigna in culo"<<std::endl;
+    
+    c = input.get(); // consumes ')' or '''
+
+    this_node->padre = nullptr;
+
+    return this_node;
+}
+
+string HuffmanTree::decode(std::istream & input){
+    head = get_tree_from_encoded_stream(input);
+
+    string output;
+
+    // here the last missing thing: get the bits and decode following 
+    // the rules of the huffman tree
+
+    return output;
+
+}
