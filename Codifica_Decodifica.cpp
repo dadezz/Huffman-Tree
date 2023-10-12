@@ -300,13 +300,55 @@ HuffmanTree::albero HuffmanTree::get_tree_from_encoded_stream(std::istream& inpu
     return this_node;
 }
 
+string HuffmanTree::read_bit(std::istream& input){
+    //ricordo che la sinistra corrisponde allo 0
+
+    char c;
+    string output;
+    albero aux = head;
+    char mask = (1<<7);
+    bool delimiter = false;
+    
+    while(input.peek() != -1 && !delimiter){
+        c = input.get();
+        for (u_short i = 0; i<8; i++){
+            aux = c & mask == 0 ? aux->sinistra : aux->destra; // navigo nell'albero
+            c = c<<1; // shifto i bit per la prosima iterazione
+            if (aux->codifica.length() == 1) {
+                // se arrivo a una foglia, appendo il carattere corrispondente e 
+                // riporto il puntatore a root
+                char tmp = aux->codifica[0];
+                if (!delimiter) output += tmp;
+                if (tmp == '\0') delimiter = true;
+                aux = head;
+            }
+        }
+    }
+
+    return output;
+}
+
 string HuffmanTree::decode(std::istream & input){
     head = get_tree_from_encoded_stream(input);
 
     string output;
 
-    // here the last missing thing: get the bits and decode following 
-    // the rules of the huffman tree
+    // mi son reffato che non c'è bisogno di alcun buffer.
+    // al posto di segnarmi i bit e controllare in continuazione se la codifica
+    // è giusta, mi sposto man mano dentro l'albero, finché non arrivo alla foglia,
+    // e appendo la codifica del nodo
+
+    /**
+     * i have the last byte of my file, for example `10010000` where the first 
+     * four bits are the encoding of `a`, which is the LAST letter of the original 
+     * uncompressed file. The problem is that `0000` (the last four bits) is also a 
+     * valid encoding, in particular for the letter `b`. What can i do to avoid 
+     * the parser to return "ab" instead of just "a"?
+     * 
+     * i can add a delimiter in the phase of encoding, for wxample '\0'
+    */
+    if (input.peek() != -1)
+        output += read_bit(input);
 
     return output;
 

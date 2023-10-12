@@ -65,6 +65,7 @@ std::istream& operator>>(std::istream& lhs, HuffmanTree& rhs){
         c = lhs.get();
         if (c != -1) rhs.insert(string{c});
     } while (c != -1);
+    rhs.insert(string{'\0'}); //aggiungo un delimitatore per il fine testo
     rhs.bubble_sort();
     return lhs;
 }
@@ -175,31 +176,5 @@ void HuffmanTree::stampa_albero_rec(albero radice, int space){
 
     //prosegup col sinistro
     stampa_albero_rec(radice->destra, space+10);
-
-}
-
-
-int main(){
-    #if PROVE
-    HuffmanTree prova;
-    //HuffmanTree prova2;
-    string s = "qwwwwwtttsssssss";
-    std::istringstream st(s);
-    ///std::ifstream file("prova.txt");
-    st>>prova;
-    //file>>prova2;
-    prova.stampa_dizionario();
-    //std::cout<<" - - - - - - - - - - - "<<std::endl;
-   // prova2.stampa_dizionario();
-    std::cout<<" - - - - - - - - - - - "<<std::endl;
-    std::cout<<" - - - - - - - - - - - "<<std::endl;
-    std::cout<<" - - - - - - - - - - - "<<std::endl;
-    std::cout<<" PROVA ALBERO "<<std::endl;
-    prova.create_tree();
-    prova.stampa_albero();
-
-    #endif
-
-    
 
 }

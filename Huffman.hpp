@@ -6,7 +6,7 @@
 #include <string>
 #include <array>
 
-#define PROVE 1
+#define PROVE 0
 
 using std::string;
 using std::pair;
@@ -56,6 +56,8 @@ class HuffmanTree{
         albero get_tree_from_encoded_stream(std::istream&);
         inline albero parse_leaf (std::istream&);
         albero parse_node (std::istream&);
+        string read_bit(std::istream&);
+
 
 
 
