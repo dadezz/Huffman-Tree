@@ -22,6 +22,10 @@ class HuffmanTree{
                 codifica = string{};
                 padre = destra = sinistra = nullptr;
             }
+            ~nodo() {
+                if (destra) delete destra;
+                if (sinistra) delete sinistra;
+            }
         }; 
 
         typedef nodo* albero;
@@ -33,15 +37,10 @@ class HuffmanTree{
             dizionario* prev;
             albero nodo_corrispondente;
             dizionario() : info(string{}, 0), next(nullptr), prev(nullptr), nodo_corrispondente(nullptr) {};
+            ~dizionario() {
+                if (next) delete next;
+            }
         };
-
-        // Helper function to recursively delete the tree
-        void destroyTree(nodo* node) {
-            if (node == nullptr) return;
-            destroyTree(node->sinistra);
-            destroyTree(node->destra);
-            delete node;
-        }
 
         dizionario* dict_head;
         dizionario* dict_tail;
@@ -66,12 +65,8 @@ class HuffmanTree{
 
         HuffmanTree() : head(nullptr), dict_head(nullptr), dict_tail(nullptr) {};
         ~HuffmanTree(){
-            while(dict_head) {
-                dizionario* aux = dict_head;
-                dict_head = dict_head->next;
-                delete aux;
-            }
-            destroyTree(head);
+            delete dict_head;
+            delete head;
         };
         friend std::istream& operator>>(std::istream& lhs, HuffmanTree& rhs);
         void swap (dizionario* &, dizionario* &);

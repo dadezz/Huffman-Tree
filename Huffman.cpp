@@ -126,7 +126,7 @@ void HuffmanTree::create_binary_node(dizionario* maggiore, dizionario* minore){
     maggiore->info.second = maggiore->info.second + minore->info.second;
     maggiore->nodo_corrispondente = radice;
 
-    delete minore;
+    if (minore->next ==nullptr) delete minore;
     
     maggiore->next = nullptr;
     dict_tail = maggiore;
