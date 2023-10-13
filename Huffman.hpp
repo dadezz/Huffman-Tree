@@ -88,4 +88,8 @@ class HuffmanTree{
         string encode (std::istream&);
         string decode(std::istream& input);
 
+        void compress(std::istream&, std::ostream&);
+        void decompress(std::istream&, std::ostream&);
+
+
 };
