@@ -190,8 +190,12 @@ void HuffmanTree::compress(std::istream& input, std::ostream& output){
 
     /*THIRD PART:
     streaming input file, encoding it*/
+    c = input.peek();
     input.clear();
+    c = input.peek();
     input.seekg(0);
+    c = input.peek();
+
     string output_string = encode(input);
     output<<output_string;
 }
@@ -437,12 +441,10 @@ string HuffmanTree::encode (std::istream& input){
     u_short position = 0;
     char byte;
     char next_char = input.peek();
-    input.seekg(0);
-    next_char = input.peek();
-
+    
     while (next_char != -1) {
         next_char = input.get();
-        navigate_tree(next_char, byte, position, output);
+        if (next_char != -1) navigate_tree(next_char, byte, position, output);
     }
     next_char = '\0'; // added at the end of the file, it is needed for decompression
     navigate_tree(next_char, byte, position, output);
@@ -636,5 +638,16 @@ int main(int argc, char* argv[]) {
         a.decompress(infile, outfile);
     }
     #endif
+
+    infile.clear();
+    infile.close();
+    outfile.clear();
+    outfile.close();
+
+    output_file_name = "decomp.txt";
+    std::ifstream infile2("prova.huf", std::ios::binary);
+    std::ofstream outfile2(output_file_name, std::ios::binary);
+
+    a.decompress(infile2, outfile2);
     return 0;
 }
