@@ -51,7 +51,7 @@ class HuffmanTree{
         void stampa_albero_rec(albero, int);
         inline void set_bit_one(char& byte, u_short position);
         inline void set_bit_zero(char& byte, u_short position);
-        inline void navigate_tree(char next_char, char& byte, u_short position, string& output);
+        inline void navigate_tree(char next_char, char& byte, u_short position, std::ostream& output);
         albero get_tree_from_encoded_stream(std::istream&);
         inline albero parse_leaf (std::istream&);
         albero parse_node (std::istream&);
@@ -61,7 +61,7 @@ class HuffmanTree{
 
 
     public:
-        std::string create_string_tree(albero);
+        string create_string_tree(albero);
 
         HuffmanTree() : head(nullptr), dict_head(nullptr), dict_tail(nullptr) {};
         ~HuffmanTree(){
@@ -80,7 +80,7 @@ class HuffmanTree{
             stampa_albero_rec(head, 0);
         };
 
-        string encode (std::istream&);
+        void encode (std::istream&, std::ostream&);
         string decode(std::istream& input);
 
         void compress(std::istream&, std::ostream&);
