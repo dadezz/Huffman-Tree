@@ -315,9 +315,8 @@ void HuffmanTree::decompress(std::istream& input, std::ostream& output){
     head = get_tree_from_encoded_stream(input);
 
     /*SECOND PART:
-    streaming input file, decoding it*/
-    string output_string = decode(input);
-    output<<output_string;
+    streaming input file, decoding it*/ 
+    decode(input, output);
 }
 
 string HuffmanTree::create_string_tree(HuffmanTree::albero nodo){
@@ -514,38 +513,7 @@ HuffmanTree::albero HuffmanTree::get_tree_from_encoded_stream(std::istream& inpu
 
     return this_node;
 }
-
-string HuffmanTree::read_bit(std::istream& input){
-    //ricordo che la sinistra corrisponde allo 0
-
-    char c;
-    string output;
-    albero aux = head;
-    char mask = (1<<7);
-    bool delimiter = false;
-    
-    while(input.peek() != -1 && !delimiter){
-        c = input.get();
-        for (u_short i = 0; i<8; i++){
-            aux = c & mask == 0 ? aux->sinistra : aux->destra; // navigo nell'albero
-            c = c<<1; // shifto i bit per la prosima iterazione
-            if (aux->codifica.length() == 1) {
-                // se arrivo a una foglia, appendo il carattere corrispondente e 
-                // riporto il puntatore a root
-                char tmp = aux->codifica[0];
-                if (!delimiter) output += tmp;
-                if (tmp == '\0') delimiter = true;
-                aux = head;
-            }
-        }
-    }
-
-    return output;
-}
-
-string HuffmanTree::decode(std::istream & input){
-
-    string output;
+void HuffmanTree::decode(std::istream & input, std::ostream& output){
 
     // mi son reffato che non c'è bisogno di alcun buffer.
     // al posto di segnarmi i bit e controllare in continuazione se la codifica
@@ -559,17 +527,44 @@ string HuffmanTree::decode(std::istream & input){
      * valid encoding, in particular for the letter `b`. What can i do to avoid 
      * the parser to return "ab" instead of just "a"?
      * 
-     * i can add a delimiter in the phase of encoding, for wxample '\0'
+     * i can add a delimiter in the phase of encoding, for example '\0'
     */
-    if (input.peek() != -1)
-        output += read_bit(input);
+    //ricordo che il ramo a sinistra corrisponde allo 0, la destra a 1
 
-    return output;
+    char c = input.peek();
+    albero aux = head;
+    char mask = (1<<7); // byte 10000000
+    bool delimiter = false;
+    
+    while(c != -1 && !delimiter){ 
+        //finché non raggiungo la fine dello stream o finché non trovo il carattere'\0'
+        //continuo a prendere caratteri in ingresso.
+        c = input.get();
+
+        for (u_short i = 0; i<BIT_IN_A_BYTE; i++){
+            // for: devo leggere ogni bit del byte in ingresso (quindi 8 iterazioni)
+
+            aux = ((c & mask) == 0 ? aux->sinistra : aux->destra); 
+            // navigo nell'albero:
+            // se il bit è uno 0, sposto il puntatore dell'albero al ramo di sinistra.
+            // altrimenti lo sposto al ramo di destra
+            
+            c = c<<1; // shifto i bit per la prosima iterazione (guardo sempre il primo bit)
+
+            if (aux->codifica.length() == 1) {
+                // se arrivo a una foglia (la lunghezza della codifica è 1),
+                // appendo il carattere corrispondente allo stream di output e 
+                // riporto il puntatore a root
+                // Il tutto, solo se la foglia trovata è un carattere valido e non il '\0'
+                char tmp = aux->codifica[0];
+                if (tmp == '\0') delimiter = true;
+                else output<<tmp;
+                aux = head;
+            }
+        }
+    }
 
 }
-#include "Huffman.hpp"
-
-
 #if PROVE
 int main(int argc, char* argv[]) {
     
@@ -658,7 +653,6 @@ int main(){
 
     a.compress(infile2, outfile2);
 
-    return 0;
 
     infile2.close();
     outfile2.close();
@@ -670,6 +664,10 @@ int main(){
     a.decompress(infile, outfile);
 
 
+    infile.close();
+    outfile.close();
+    
 
+    return 0;
 
 }
