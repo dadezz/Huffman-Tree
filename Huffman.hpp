@@ -7,6 +7,7 @@
 #include <array>
 
 #define PROVE 0
+#define BIT_IN_A_BYTE 8
 
 using std::string;
 using std::pair;
@@ -55,7 +56,6 @@ class HuffmanTree{
         albero get_tree_from_encoded_stream(std::istream&);
         inline albero parse_leaf (std::istream&);
         albero parse_node (std::istream&);
-        string read_bit(std::istream&);
 
 
 
@@ -68,7 +68,6 @@ class HuffmanTree{
             delete dict_head;
             delete head;
         };
-        friend std::istream& operator>>(std::istream& lhs, HuffmanTree& rhs);
         void swap (dizionario* &, dizionario* &);
         void stampa_dizionario();
         albero get_tree_head(){
@@ -81,7 +80,7 @@ class HuffmanTree{
         };
 
         void encode (std::istream&, std::ostream&);
-        string decode(std::istream& input);
+        void decode(std::istream& input, std::ostream&);
 
         void compress(std::istream&, std::ostream&);
         void decompress(std::istream&, std::ostream&);
