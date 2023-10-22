@@ -52,21 +52,18 @@ class HuffmanTree{
         void stampa_albero_rec(albero, int);
         inline void set_bit_one(char& byte, u_short position);
         inline void set_bit_zero(char& byte, u_short position);
-        inline void navigate_tree(char next_char, char& byte, u_short position, std::ostream& output);
+        inline void navigate_tree(char next_char, char& byte, u_short& position, std::ostream& output);
         albero get_tree_from_encoded_stream(std::istream&);
         inline albero parse_leaf (std::istream&);
         albero parse_node (std::istream&);
 
-
-
-
     public:
-        string create_string_tree(albero);
+        void create_string_tree(albero, std::ostream&);
 
         HuffmanTree() : head(nullptr), dict_head(nullptr), dict_tail(nullptr) {};
         ~HuffmanTree(){
-            delete dict_head;
-            delete head;
+            if (dict_head) delete dict_head;
+            if (head) delete head;
         };
         void swap (dizionario* &, dizionario* &);
         void stampa_dizionario();

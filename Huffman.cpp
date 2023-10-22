@@ -297,14 +297,12 @@ void HuffmanTree::compress(std::istream& input, std::ostream& output){
 
     /*THIRD PART:
     streaming input file, encoding it*/
-    c = input.peek();
     input.clear();
-    c = input.peek();
     input.seekg(0);
-    c = input.peek();
 
     encode(input, output);
 
+    delete head; //libero la memoria dell'albero (nella fase di decompressione ne creerei uno nuovo potenzialmente sullo stesso oggetto HuffmanTree)
 }
 
 
@@ -319,7 +317,7 @@ void HuffmanTree::decompress(std::istream& input, std::ostream& output){
     decode(input, output);
 }
 
-string HuffmanTree::create_string_tree(HuffmanTree::albero nodo){
+void HuffmanTree::create_string_tree(HuffmanTree::albero nodo, std::ostream& output){
     //punto 0 della codifica
 
     /**
@@ -328,16 +326,30 @@ string HuffmanTree::create_string_tree(HuffmanTree::albero nodo){
      * Se un testo da comprimere contenesse delle parentesi, il successivo albero 
      * risulterebbe avere parentesi non bilanciate (impossibile distinguere i rami dalle foglie)
     */
-    if (nodo->destra == nullptr && nodo->sinistra == nullptr) return "'" + nodo->codifica + "'" ;
-    if (nodo->destra == nullptr && nodo->sinistra != nullptr) return create_string_tree(nodo->sinistra) + "," + "'" + nodo->codifica + "'";
-    if (nodo->sinistra == nullptr && nodo->destra != nullptr) return "'" + nodo->codifica + "'" + "," + create_string_tree(nodo->destra);
-    else return "(" + create_string_tree(nodo->sinistra) + "," + create_string_tree(nodo->destra) + ")";
+    if (nodo->destra == nullptr && nodo->sinistra == nullptr) {
+        output<<"'"<<nodo->codifica<<"'" ;
+    }
+    else if (nodo->destra == nullptr && nodo->sinistra != nullptr) {
+        create_string_tree(nodo->sinistra, output);
+        output<<","<<"\'"<<nodo->codifica<<"'";
+    }
+    else if (nodo->sinistra == nullptr && nodo->destra != nullptr) {
+        output<<"'"<<nodo->codifica<<"'"<<",";
+        create_string_tree(nodo->destra, output);
+    }
+    else{
+        output<<"(";
+        create_string_tree(nodo->sinistra, output);
+        output<<",";
+        create_string_tree(nodo->destra, output);
+        output<<")";
+    }
 }
 
 inline void HuffmanTree::set_bit_zero(char& byte, u_short position){
     // sinistra
     char mask = 1;
-    for (short i=0; i<(8-position); i++){
+    for (short i=0; i<(BIT_IN_A_BYTE-position); i++){
         mask = mask<<1;
     }
     mask = (~mask);
@@ -347,7 +359,7 @@ inline void HuffmanTree::set_bit_zero(char& byte, u_short position){
 inline void HuffmanTree::set_bit_one(char& byte, u_short position){
     // destra
     char mask = 1;
-    for (short i=0; i<(8-position); i++){
+    for (short i=0; i<(BIT_IN_A_BYTE-position); i++){
         mask = mask<<1;
     }
     byte = byte | mask;
@@ -368,10 +380,10 @@ inline void HuffmanTree::set_bit_one(char& byte, u_short position){
  * i passaggi son quindi sempre 5, ma la ricerca on the fly non richiede spazio 
  * aggiuntivo, userò quella.
 */
-
-int check_encoding_char(char c, string s){
+enum carattere_appartiene_a_stringa {CARATTERE_NON_IN_STRINGA, STRINGA_COINCIDE_CON_CARATTERE, CARATTERE_IN_STRINGA};
+carattere_appartiene_a_stringa check_encoding_char(char c, string s){
     if (s.length() == 1) 
-        return s[0] == c ? 1 : 0;
+        return s[0] == c ? STRINGA_COINCIDE_CON_CARATTERE : CARATTERE_NON_IN_STRINGA;
     bool found = 0;
     int i = 0;
     while (i<s.length() && !found){
@@ -379,29 +391,40 @@ int check_encoding_char(char c, string s){
             found = true;
         i++;
     }
-    return found ? 2 : 0;
+    return found ? CARATTERE_IN_STRINGA : CARATTERE_NON_IN_STRINGA;
 }
 
-inline void HuffmanTree::navigate_tree(char next_char, char& byte, u_short position, std::ostream& output){
+inline void HuffmanTree::navigate_tree(char next_char, char& byte, u_short& position, std::ostream& output){
     albero aux = head;
     bool found = false;
     while (!found) {
 
-        // binary search
-        int here = check_encoding_char(next_char, aux->sinistra->codifica);
-        if (here == 1 || here == 2) {
-            position = (position+1) % 8;
+        /*
+            FIRST STEP: BINARY SEARCH
+        */
+        carattere_appartiene_a_stringa here = check_encoding_char(next_char, aux->sinistra->codifica);
+        // (I start with the left branch)
+        if (here == STRINGA_COINCIDE_CON_CARATTERE || here == CARATTERE_IN_STRINGA) {
+            // in this case, i know for sure that the char is on the left branch of the tree
+            // So, i can write the bit to Zero
+            position = (position+1) % BIT_IN_A_BYTE;
             set_bit_zero(byte, position);
+            // and move on the left child node
             aux = aux->sinistra;
-            if (here == 1) found = true;            
+            // last thing is: if i am on a leaf, i have found the char
+            if (here == STRINGA_COINCIDE_CON_CARATTERE) found = true;            
         }
         else {
-            // i know for sure that the char is on this branch
-            position = (position+1) % 8;
+            // in this case, I know for sure that the char is on the right branch of the tree
+            // so, i can write the bit to One
+            position = (position+1) % BIT_IN_A_BYTE;
             set_bit_one(byte, position);
+            // i need to check if i am on the leaf or just on a node:
+            // i call again the function, but for the right branch
             here = check_encoding_char(next_char, aux->destra->codifica);
             aux = aux->destra;
-            if (here == 1) found = true;
+            // last thing is: if i am on a leaf, i have found the char
+            if (here == STRINGA_COINCIDE_CON_CARATTERE) found = true;
         }
 
         // if i completed a byte, i have to append it to the output string and reset 
@@ -415,7 +438,10 @@ inline void HuffmanTree::navigate_tree(char next_char, char& byte, u_short posit
 }
 
 void HuffmanTree::encode (std::istream& input, std::ostream& output){
-    output<<create_string_tree(head);
+    
+    output.clear();
+
+    create_string_tree(head, output);
         /**
          * ho una stringa che sarà il testo finale.
          * devo aggiungere un byte SOLO quando è completo 
@@ -435,11 +461,18 @@ void HuffmanTree::encode (std::istream& input, std::ostream& output){
          * NON USO STRINGHE AUSILIARIE, MA BUTTO DIRETTAMENTE TUTTO IN OUTPUT
         */
 
+    input.clear();
+    output.clear();
+
     u_short position = 0;
     char byte;
     char next_char = input.peek();
     
     while (next_char != -1) {
+
+        input.clear();
+        output.clear();
+
         next_char = input.get();
         if (next_char != -1) navigate_tree(next_char, byte, position, output);
     }
