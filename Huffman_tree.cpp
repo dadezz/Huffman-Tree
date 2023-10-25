@@ -245,7 +245,7 @@ HuffmanTree::albero HuffmanTree::parse_node (std::istream& input){
  * PARSELEAF: in the decompression part, it parses a leaf
  * to buid the binary tree data structure
 */
-inline HuffmanTree::albero HuffmanTree::parse_leaf (std::istream& input){
+HuffmanTree::albero HuffmanTree::parse_leaf (std::istream& input){
     char c;
     c = input.get();
     albero this_node = new nodo;

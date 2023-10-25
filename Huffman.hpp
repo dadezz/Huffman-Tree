@@ -6,7 +6,6 @@
 #include <string>
 #include <array>
 
-#define PROVE 0
 #define BIT_IN_A_BYTE 8
 
 using std::string;
@@ -50,22 +49,22 @@ class HuffmanTree{
         void bubble_sort();
         void create_binary_node(dizionario* maggiore, dizionario* minore);
         void stampa_albero_rec(albero, int);
-        inline void set_bit_one(char& byte, u_short position);
-        inline void set_bit_zero(char& byte, u_short position);
-        inline void navigate_tree(char next_char, char& byte, u_short& position, std::ostream& output);
+        void navigate_tree(char next_char, char& byte, u_short& position, std::ostream& output);
         albero get_tree_from_encoded_stream(std::istream&);
-        inline albero parse_leaf (std::istream&);
+        albero parse_leaf (std::istream&);
         albero parse_node (std::istream&);
+        void create_string_tree(albero, std::ostream&);
+        void set_bit_one(char& byte, u_short position);
+        void set_bit_zero(char& byte, u_short position);
+        void swap (dizionario* &, dizionario* &);
+
 
     public:
-        void create_string_tree(albero, std::ostream&);
-
         HuffmanTree() : head(nullptr), dict_head(nullptr), dict_tail(nullptr) {};
         ~HuffmanTree(){
             if (dict_head) delete dict_head;
             if (head) delete head;
         };
-        void swap (dizionario* &, dizionario* &);
         void stampa_dizionario();
         albero get_tree_head(){
             return head;
@@ -81,6 +80,4 @@ class HuffmanTree{
 
         void compress(std::istream&, std::ostream&);
         void decompress(std::istream&, std::ostream&);
-
-
 };

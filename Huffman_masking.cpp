@@ -1,4 +1,5 @@
 #include "Huffman.hpp"
+
 /**
  * BIT MASKING
  * posso fare bitmasking con operatori bitwise:
@@ -64,21 +65,24 @@
 */
 
 
-inline void HuffmanTree::set_bit_zero(char& byte, u_short position){
+void HuffmanTree::set_bit_zero(char& byte, u_short position){
     // sinistra
-    char mask = 1;
-    for (short i=0; i<(BIT_IN_A_BYTE-position); i++){
-        mask = mask<<1;
-    }
-    mask = (~mask);
-    byte = byte & mask;
+    /**
+     * position 0: bit + significativo -> 1<<7  8-0-1=7
+     * position 1: 1<<6  =  8-1-1 = 6
+     * position 2: 1<<5  =  8-2-1 = 5
+     * position 3: 1<<4  =  8-3-1 = 4
+     * position 4: 1<<3  =  8-4-1 = 3
+     * position 5: 1<<2  =  8-5-1 = 2
+     * position 6: 1<<1  =  8-6-1 = 1
+     * position 7: 1<<0  =  8-7-1 = 0
+    */
+    char mask = 1 << (BIT_IN_A_BYTE - position - 1);
+    byte = byte & ~mask;
 }
 
-inline void HuffmanTree::set_bit_one(char& byte, u_short position){
+void HuffmanTree::set_bit_one(char& byte, u_short position){
     // destra
-    char mask = 1;
-    for (short i=0; i<(BIT_IN_A_BYTE-position); i++){
-        mask = mask<<1;
-    }
+    char mask = 1 << (BIT_IN_A_BYTE - position - 1);
     byte = byte | mask;
 }
