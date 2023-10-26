@@ -2,9 +2,9 @@
 Semplice implementazione di un algoritmo di compressione testi basato sull'albero di huffman. 
 
 Diviso in 3 parti
- - [x] creazione dell'albero (vedasi sezione "huffman-Tree")
- - [x] Compressione (vedasi i commenti nel codice)
- - [ ] Decompressione (in fase di debugging: va in loop infinito (creando file di interi gb con la stessa lettera ripetuta))
+ - [x] creazione dell'albero 
+ - [x] Compressione 
+ - [X] Decompressione 
 
 ***
 
@@ -39,3 +39,16 @@ Ovviamente a inizio testo va aggiunto l'albero (in ascii), quindi `((W,(T,Q)),S)
 
 ## Decompressione
 La decompressione avviene con il processo opposto rispetto alla compressione. Inizia con il parsing dell'albero binario: dalla stringa a parentesi bilanciate ricrea la sruttura dati. Prosegue poi con la lettura di bit: per ogni bit segue il ramo corrispondente fino ad arrivare a una foglia e quindi a una lettera da porre nel file decompresso.
+
+***
+
+## Struttura Codice
+Il codice è contenuto nella directory `src`, ed è suddiviso in 4 file. 
+1. `Huffman_masking`: contiene le funzioni a più basso livello, che settano i singoli bit
+2. `Huffman_tree`: contiene tutte le funzioni inerenti l'albero come struttura dati e il dizionario: creazione di nodi e allocazione memoria, ordinamento, inserimento, parsing delle parentesi bilanciate
+3. `Huffman_core_logic`: contiene tutte le funzioni che implementano la logica vera e propria degli algoritmi di de/compressione
+4. `Huffman_main`: main e funzioni ausiliarie strettamente collegate
+
+### Makefile
+
+Per usare il programma, lanciare il comando make dalla directory principale, l'eseguibile risultante avrà come nome HuffmanLauncher

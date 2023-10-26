@@ -1,6 +1,7 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -O3
-SOURCES = Huffman_masking.cpp Huffman_tree.cpp Huffman_core_logic.cpp Huffman_main.cpp
+CXXFLAGS = -std=c++11 -o3
+SRC_DIR = src/
+SOURCES = $(SRC_DIR)Huffman_masking.cpp $(SRC_DIR)Huffman_tree.cpp $(SRC_DIR)Huffman_core_logic.cpp $(SRC_DIR)Huffman_main.cpp
 TARGET = HuffmanLauncher
 
 $(TARGET): $(SOURCES)
