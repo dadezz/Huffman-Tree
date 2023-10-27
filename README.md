@@ -51,4 +51,5 @@ Il codice è contenuto nella directory `src`, ed è suddiviso in 4 file.
 
 ### Makefile
 
-Per usare il programma, lanciare il comando make dalla directory principale, l'eseguibile risultante avrà come nome HuffmanLauncher
+Per usare il programma, lanciare il comando make dalla directory principale, l'eseguibile risultante avrà come nome HuffmanLauncher.
+Per fare un test, il file "prova.txt" contiene un testo di esempio. Dato in pasto al programma, produce il file "prova.huf". La decompressione di quest'ultimo infine è salvata sul file "prova", che si può notare essere del tutto identico all'originale "prova.txt"

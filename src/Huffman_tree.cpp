@@ -14,17 +14,17 @@
 */
 void HuffmanTree::insert(string x){
 
-    bool inserito = false;
-    dizionario* aux = dict_head;
-    while(aux && !inserito){
+    bool inserted = false;
+    dictionary* aux = dict_head;
+    while(aux && !inserted){
         if (x == aux->info.first) {
             aux->info.second += 1;
-            inserito = true;
+            inserted = true;
         }
         aux = aux->next;
     }
-    if (inserito == true) return;
-    aux = new dizionario;
+    if (inserted == true) return;
+    aux = new dictionary;
     aux->info.first = x;
     aux->info.second = 1;
     if (dict_head == nullptr) {
@@ -44,21 +44,21 @@ void HuffmanTree::insert(string x){
  * SWAP: swap between two elements of the dictionary
  * (used in bubble_sort)
 */
-void HuffmanTree::swap(dizionario* & a, dizionario* & b){
+void HuffmanTree::swap(dictionary* & a, dictionary* & b){
     pair<string, int> aux = a->info;
     a->info = b->info;
     b->info = aux;
 
-    albero aux2 = a->nodo_corrispondente;
-    a->nodo_corrispondente = b->nodo_corrispondente;
-    b->nodo_corrispondente = aux2;
+    tree_t aux2 = a->corresponding_node;
+    a->corresponding_node = b->corresponding_node;
+    b->corresponding_node = aux2;
 }
 
 /**
  * BUBBLESORT: i want the dictionary to be sorted with the most common letter in the first place    
 */
 void HuffmanTree::bubble_sort() {
-    dizionario *aux1, *aux2;
+    dictionary *aux1, *aux2;
     for (aux1 = dict_head; aux1 != nullptr; aux1 = aux1->next) {
         for (aux2 = dict_head; aux2 != nullptr; aux2 = aux2->next) {
             if (aux2->next != nullptr && aux2->info.second <= aux2->next->info.second) {
@@ -73,23 +73,11 @@ void HuffmanTree::bubble_sort() {
 }
 
 /**
- * STAMPADIZIONARIO: it prints the dictionary on the standard output, 
- * one element per line, format: (key : frequency)
-*/
-void HuffmanTree::stampa_dizionario(){
-    dizionario* aux = dict_head;
-    while(aux) {
-        std::cout<<"( "<<aux->info.first<<" : "<<aux->info.second<<" )"<<std::endl;
-        aux = aux->next;
-    }
-}
-
-/**
  * CREATEBINARYNODE: creation of the monad "root, left, right", given the last two elements 
  * of the dictionary. 
  *      + rearrange dictionary
 */
-void HuffmanTree::create_binary_node(dizionario* maggiore, dizionario* minore){
+void HuffmanTree::create_binary_node(dictionary* greater, dictionary* smaller){
     /**
      * this function creates a binary tree with one root and two leaf nodes 
      * (which can be trees, too).
@@ -112,43 +100,42 @@ void HuffmanTree::create_binary_node(dizionario* maggiore, dizionario* minore){
      *                        \-> (b:1)
     */  
     
-    albero radice = new nodo;
-    radice->codifica = maggiore->info.first + minore->info.first;
-    albero mag /*sinistra (bit 0) */, min /*destra (bit 1)*/;
+    tree_t root = new node;
+    root->encoding = greater->info.first + smaller->info.first;
+    tree_t mag /*left (bit 0) */, min /*right (bit 1)*/;
 
-    /**
-     * creo l'albero bottom-up
+    /*
+        creation bottom-up
     */
 
-    if (maggiore->nodo_corrispondente == nullptr) {
-        mag = new nodo;
-        mag->destra = mag->sinistra = nullptr;
-        mag->codifica = maggiore->info.first;
+    if (greater->corresponding_node == nullptr) {
+        mag = new node;
+        mag->right_subtree = mag->left_subtree = nullptr;
+        mag->encoding = greater->info.first;
     }
-    else mag = maggiore->nodo_corrispondente;
-    if (minore->nodo_corrispondente == nullptr) {
-        min = new nodo;
-        min->destra = min->sinistra = nullptr;
-        min->codifica = minore->info.first;
+    else mag = greater->corresponding_node;
+    if (smaller->corresponding_node == nullptr) {
+        min = new node;
+        min->right_subtree = min->left_subtree = nullptr;
+        min->encoding = smaller->info.first;
     }
-    else min = minore->nodo_corrispondente;
-    mag->padre = radice;
-    min->padre = radice;
-    radice->destra = min;
-    radice->sinistra = mag;
+    else min = smaller->corresponding_node;
+    mag->father = root;
+    min->father = root;
+    root->right_subtree = min;
+    root->left_subtree = mag;
 
     /**
-     * risistemo il dizionario
+     * rearrange dictionary
     */
-    maggiore->info.first = radice->codifica;
-    maggiore->info.second = maggiore->info.second + minore->info.second;
-    maggiore->nodo_corrispondente = radice;
+    greater->info.first = root->encoding;
+    greater->info.second = greater->info.second + smaller->info.second;
+    greater->corresponding_node = root;
 
-    if (minore->next ==nullptr) delete minore;
+    if (smaller->next ==nullptr) delete smaller;
     
-    maggiore->next = nullptr;
-    dict_tail = maggiore;
-
+    greater->next = nullptr;
+    dict_tail = greater;
 
     this->bubble_sort();
 }
@@ -157,16 +144,16 @@ void HuffmanTree::create_binary_node(dizionario* maggiore, dizionario* minore){
  * CREATETREE: creation of the tree. it just calls create_binary_node
  * until every element of the dictionary is represented on the tree
 */
-HuffmanTree::albero HuffmanTree::create_tree(){
+HuffmanTree::tree_t HuffmanTree::create_tree(){
     if (dict_head == nullptr) return nullptr;
     while (dict_head->next != nullptr){
         create_binary_node(dict_tail->prev, dict_tail);
     }
-    head = dict_head->nodo_corrispondente;
+    head = dict_head->corresponding_node;
 
-    /**
-     * At this point, head of the tree is set, 
-     * i can delete the last node of the dictionary and set the pointers to nullptr
+    /*
+        At this point, head of the tree is set, 
+        i can delete the last node of the dictionary and set the pointers to nullptr
     */
     delete dict_head;
     dict_head = dict_tail = nullptr;
@@ -175,44 +162,43 @@ HuffmanTree::albero HuffmanTree::create_tree(){
 }
 
 /**
- * STAMPAALBEROREC: for debugging, it prints on std output the binary tree structure
+ * PRINT_TREE_REC: for debugging, it prints on std output the binary tree structure
 */
-void HuffmanTree::stampa_albero_rec(albero radice, int space){
-    if (radice == nullptr) return;
+void HuffmanTree::print_tree_rec(tree_t tree_root, int space){
+    if (tree_root == nullptr) return;
 
-    //prima faccio il ramo destro
-    stampa_albero_rec(radice->sinistra, space+10);
+    //right branch
+    print_tree_rec(tree_root->left_subtree, space+10);
 
-    //faccio la stampa effettiva
     std::cout<<std::endl;
     for (int i=0; i<space; i++) std::cout<<" ";
-    std::cout<<radice->codifica<<std::endl;
+    std::cout<<tree_root->encoding<<std::endl;
 
-    //prosegup col sinistro
-    stampa_albero_rec(radice->destra, space+10);
+    //left branch
+    print_tree_rec(tree_root->right_subtree, space+10);
 }
 
 /**
  * CREATESRINGTREE: recursive function which create the balanced parentheses string based 
  * on the binary tree structure
 */
-void HuffmanTree::create_string_tree(HuffmanTree::albero nodo, std::ostream& output){
-    if (nodo->destra == nullptr && nodo->sinistra == nullptr) {
-        output<<"'"<<nodo->codifica<<"'" ;
+void HuffmanTree::create_string_tree(HuffmanTree::tree_t n, std::ostream& output){
+    if (n->right_subtree == nullptr && n->left_subtree == nullptr) {
+        output<<"'"<<n->encoding<<"'" ;
     }
-    else if (nodo->destra == nullptr && nodo->sinistra != nullptr) {
-        create_string_tree(nodo->sinistra, output);
-        output<<","<<"\'"<<nodo->codifica<<"'";
+    else if (n->right_subtree == nullptr && n->left_subtree != nullptr) {
+        create_string_tree(n->left_subtree, output);
+        output<<","<<"\'"<<n->encoding<<"'";
     }
-    else if (nodo->sinistra == nullptr && nodo->destra != nullptr) {
-        output<<"'"<<nodo->codifica<<"'"<<",";
-        create_string_tree(nodo->destra, output);
+    else if (n->left_subtree == nullptr && n->right_subtree != nullptr) {
+        output<<"'"<<n->encoding<<"'"<<",";
+        create_string_tree(n->right_subtree, output);
     }
     else{
         output<<"(";
-        create_string_tree(nodo->sinistra, output);
+        create_string_tree(n->left_subtree, output);
         output<<",";
-        create_string_tree(nodo->destra, output);
+        create_string_tree(n->right_subtree, output);
         output<<")";
     }
 }
@@ -221,22 +207,22 @@ void HuffmanTree::create_string_tree(HuffmanTree::albero nodo, std::ostream& out
  * PARSENODE: in the decompression part, it parses a node (not the leaf)
  * to buid the binary tree data structure
 */
-HuffmanTree::albero HuffmanTree::parse_node (std::istream& input){
+HuffmanTree::tree_t HuffmanTree::parse_node (std::istream& input){
     
     char c;    
-    albero this_node = new nodo;
-    this_node->sinistra = get_tree_from_encoded_stream(input);
-    this_node->codifica += this_node->sinistra->codifica;
-    this_node->sinistra->padre = this_node;
+    tree_t this_node = new node;
+    this_node->left_subtree = get_tree_from_encoded_stream(input);
+    this_node->encoding += this_node->left_subtree->encoding;
+    this_node->left_subtree->father = this_node;
 
     c = input.get(); // consumes ','
     if (c != ',') std::cout<<"(virgola) ah rega sto parsing che pigna in culo"<<std::endl;
 
-    this_node->destra = get_tree_from_encoded_stream(input);
-    this_node->codifica += this_node->destra->codifica;
-    this_node->destra->padre = this_node;
+    this_node->right_subtree = get_tree_from_encoded_stream(input);
+    this_node->encoding += this_node->right_subtree->encoding;
+    this_node->right_subtree->father = this_node;
 
-    if (input.peek() != ')') std::cout<<"(parentesi chiusura) ah rega sto parsing che pigna in culo"<<std::endl;
+    if (input.peek() != ')') std::cerr<<"parsing error"<<std::endl;
     
     return this_node;
 }
@@ -245,14 +231,14 @@ HuffmanTree::albero HuffmanTree::parse_node (std::istream& input){
  * PARSELEAF: in the decompression part, it parses a leaf
  * to buid the binary tree data structure
 */
-HuffmanTree::albero HuffmanTree::parse_leaf (std::istream& input){
+HuffmanTree::tree_t HuffmanTree::parse_leaf (std::istream& input){
     char c;
     c = input.get();
-    albero this_node = new nodo;
-    this_node->sinistra = this_node->destra = nullptr;
-    this_node->codifica = c;
+    tree_t this_node = new node;
+    this_node->left_subtree = this_node->right_subtree = nullptr;
+    this_node->encoding = c;
 
-    if (input.peek() != '\'') std::cout<<"(apice chiusura) ah rega sto parsing che pigna in culo"<<std::endl;
+    if (input.peek() != '\'') std::cerr<<"parsing error"<<std::endl;
 
     return this_node;
 }
@@ -261,13 +247,13 @@ HuffmanTree::albero HuffmanTree::parse_leaf (std::istream& input){
  * GETTREEFROMENCODEDSTREAM: in the decompression phase, parsing the balanced parentheses to
  * build the binary tree
 */
-HuffmanTree::albero HuffmanTree::get_tree_from_encoded_stream(std::istream& input){
+HuffmanTree::tree_t HuffmanTree::get_tree_from_encoded_stream(std::istream& input){
     
     char c;
-    albero this_node;
+    tree_t this_node;
     
     if (input.eof()) {
-        std::cout<<"wtf eof"<<std::endl;
+        std::cerr<<"parsing error"<<std::endl;
         return nullptr;
     }
 
@@ -277,11 +263,11 @@ HuffmanTree::albero HuffmanTree::get_tree_from_encoded_stream(std::istream& inpu
         this_node = parse_node(input); // consumes something like ( ... , ... )
     else if (c == '\'')
         this_node = parse_leaf(input); // consumes something like 'c'
-    else std::cout<<"(parentesi o apice iniziali) ah rega sto parsing che pigna in culo"<<std::endl;
+    else std::cerr<<"parsing error"<<std::endl;
     
     c = input.get(); // consumes ')' or '''
 
-    this_node->padre = nullptr;
+    this_node->father = nullptr;
 
     return this_node;
 }
